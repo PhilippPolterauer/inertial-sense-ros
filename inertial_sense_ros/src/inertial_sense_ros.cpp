@@ -1334,7 +1334,7 @@ void InertialSenseROS::INL2_states_callback(eDataIDs DID, const inl2_states_t *c
 
     inl2_states_msg.barobias = msg->biasBaro;
     inl2_states_msg.magdec = msg->magdec;
-    inl2_states_msg.magInc = msg->magInc;
+    inl2_states_msg.maginc = msg->maginc;
 
     // Use custom INL2 states message
     if (INL2_states_.enabled)
@@ -1696,15 +1696,15 @@ void InertialSenseROS::RTK_Misc_callback(eDataIDs DID, const gps_rtk_misc_t *con
     {
         
         rtk_info.header.stamp = ros_time_from_week_and_tow(GPS_week_, msg->timeofweekMs / 1000.0);
-        rtk_info.baseAntcount = msg->baseAntennaCount;
-        rtk_info.baseEph = msg->baseBeidouEphemerisCount + msg->baseGalileoEphemerisCount + msg->baseGlonassEphemerisCount + msg->baseGpsEphemerisCount;
-        rtk_info.baseObs = msg->baseBeidouObservationCount + msg->baseGalileoObservationCount + msg->baseGlonassObservationCount + msg->baseGpsObservationCount;
-        rtk_info.BaseLLA[0] = msg->baseLla[0];
-        rtk_info.BaseLLA[1] = msg->baseLla[1];
-        rtk_info.BaseLLA[2] = msg->baseLla[2];
+        rtk_info.baseantcount = msg->baseAntennaCount;
+        rtk_info.baseeph = msg->baseBeidouEphemerisCount + msg->baseGalileoEphemerisCount + msg->baseGlonassEphemerisCount + msg->baseGpsEphemerisCount;
+        rtk_info.baseobs = msg->baseBeidouObservationCount + msg->baseGalileoObservationCount + msg->baseGlonassObservationCount + msg->baseGpsObservationCount;
+        rtk_info.basella[0] = msg->baseLla[0];
+        rtk_info.basella[1] = msg->baseLla[1];
+        rtk_info.basella[2] = msg->baseLla[2];
 
-        rtk_info.roverEph = msg->roverBeidouEphemerisCount + msg->roverGalileoEphemerisCount + msg->roverGlonassEphemerisCount + msg->roverGpsEphemerisCount;
-        rtk_info.roverObs = msg->roverBeidouObservationCount + msg->roverGalileoObservationCount + msg->roverGlonassObservationCount + msg->roverGpsObservationCount;
+        rtk_info.rovereph = msg->roverBeidouEphemerisCount + msg->roverGalileoEphemerisCount + msg->roverGlonassEphemerisCount + msg->roverGpsEphemerisCount;
+        rtk_info.roverobs = msg->roverBeidouObservationCount + msg->roverGalileoObservationCount + msg->roverGlonassObservationCount + msg->roverGpsObservationCount;
         rtk_info.cycle_slip_count = msg->cycleSlipCount;
     }
     if (DID == DID_GPS1_RTK_POS_MISC)
@@ -1738,23 +1738,23 @@ void InertialSenseROS::RTK_Rel_callback(eDataIDs DID, const gps_rtk_rel_t *const
         uint32_t fixStatus = msg->status & GPS_STATUS_FIX_MASK;
         if (fixStatus == GPS_STATUS_FIX_3D)
         {
-            rtk_rel.eGpsNavFixStatus = inertial_sense_ros::RTKRel::GPS_STATUS_FIX_3D;
+            rtk_rel.egpsnavfixstatus = inertial_sense_ros::RTKRel::GPS_STATUS_FIX_3D;
         }
         else if (fixStatus == GPS_STATUS_FIX_RTK_SINGLE)
         {
-            rtk_rel.eGpsNavFixStatus = inertial_sense_ros::RTKRel::GPS_STATUS_FIX_RTK_SINGLE;
+            rtk_rel.egpsnavfixstatus = inertial_sense_ros::RTKRel::GPS_STATUS_FIX_RTK_SINGLE;
         }
         else if (fixStatus == GPS_STATUS_FIX_RTK_FLOAT)
         {
-            rtk_rel.eGpsNavFixStatus = inertial_sense_ros::RTKRel::GPS_STATUS_FIX_RTK_FLOAT;
+            rtk_rel.egpsnavfixstatus = inertial_sense_ros::RTKRel::GPS_STATUS_FIX_RTK_FLOAT;
         }
         else if (fixStatus == GPS_STATUS_FIX_RTK_FIX)
         {
-            rtk_rel.eGpsNavFixStatus = inertial_sense_ros::RTKRel::GPS_STATUS_FIX_RTK_FIX;
+            rtk_rel.egpsnavfixstatus = inertial_sense_ros::RTKRel::GPS_STATUS_FIX_RTK_FIX;
         }
         else if (msg->status & GPS_STATUS_FLAGS_RTK_FIX_AND_HOLD)
         {
-            rtk_rel.eGpsNavFixStatus = inertial_sense_ros::RTKRel::GPS_STATUS_FLAGS_RTK_FIX_AND_HOLD;
+            rtk_rel.egpsnavfixstatus = inertial_sense_ros::RTKRel::GPS_STATUS_FLAGS_RTK_FIX_AND_HOLD;
         }
 
         rtk_rel.vector_base_to_rover.x = msg->baseToRoverVector[0];
@@ -1785,7 +1785,7 @@ void InertialSenseROS::RTK_Rel_callback(eDataIDs DID, const gps_rtk_rel_t *const
         diagnostic_ar_ratio_ = rtk_rel.ar_ratio;
         diagnostic_differential_age_ = rtk_rel.differential_age;
         diagnostic_heading_base_to_rover_ = rtk_rel.heading_base_to_rover;
-        diagnostic_fix_type_ = rtk_rel.eGpsNavFixStatus;
+        diagnostic_fix_type_ = rtk_rel.egpsnavfixstatus;
 }
 
 void InertialSenseROS::GPS_raw_callback(eDataIDs DID, const gps_raw_t *const msg)
@@ -1857,14 +1857,14 @@ void InertialSenseROS::GPS_obs_callback(eDataIDs DID, const obsd_t *const msg, i
         obs.time.sec = msg[i].time.sec;
         obs.sat = msg[i].sat;
         obs.rcv = msg[i].rcv;
-        obs.SNR = msg[i].SNR[0];
-        obs.LLI = msg[i].LLI[0];
+        obs.snr = msg[i].snr[0];
+        obs.lli = msg[i].lli[0];
         obs.code = msg[i].code[0];
-        obs.qualL = msg[i].qualL[0];
-        obs.qualP = msg[i].qualP[0];
-        obs.L = msg[i].L[0];
-        obs.P = msg[i].P[0];
-        obs.D = msg[i].D[0];
+        obs.quall = msg[i].quall[0];
+        obs.qualp = msg[i].qualp[0];
+        obs.l = msg[i].l[0];
+        obs.p = msg[i].p[0];
+        obs.d = msg[i].d[0];
         if (DID == DID_GPS1_RAW)
         {
             gps1_obs_Vec_.obs.push_back(obs);

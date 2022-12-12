@@ -1,4 +1,4 @@
-Header header
+std_msgs/Header header
 uint32 week                             # GPS number of weeks since January 6th, 1980 
 int8 num_sat                            # Number of satellites used in solution
 uint32 status                           # Fix type and status flags.  See GPS_STATUS_FIX_... and GPS_STATUS_FLAGS_... in sdk data_sets.h

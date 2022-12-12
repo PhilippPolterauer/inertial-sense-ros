@@ -11,8 +11,11 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 set(msg_files
+  "msg/GTime.msg"
   "msg/DIDINS1.msg"
   "msg/DIDINS4.msg"
   "msg/GNSSEphemeris.msg"
@@ -25,16 +28,17 @@ set(msg_files
   "msg/GlonassEphemeris.msg"
   "msg/GNSSObservation.msg"
   "msg/GPSInfo.msg"
-  "msg/GTime.msg"
   "msg/PreIntIMU.msg"
   "msg/RTKRel.msg"
 )
 set(srv_files
   "srv/FirmwareUpdate.srv"
-  "srv/refLLAUpdate.srv"  
+  "srv/RefLLAUpdate.srv"  
 )
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
+  ${srv_files}
+  DEPENDENCIES builtin_interfaces std_msgs geometry_msgs
 )
 
 if(BUILD_TESTING)
