@@ -6,11 +6,11 @@ int32 cno                               # Average of all non-zero satellite carr
 float64 latitude                        # Latitude (degrees)
 float64 longitude                       # Longitude (degrees)
 float64 altitude                        # Height above ellipsoid (not MSL) (m)
-geometry_msgs/Vector3 posEcef           # Position (m) in ECEF
-geometry_msgs/Vector3 velEcef           # Velocity (m/s) in ECEF
-float32 hMSL                            # Height above MSL
-float32 hAcc                            # Horizontal accuracy
-float32 vAcc                            # Vertical accuracy
-float32 sAcc                            # Speed accuracy (m/s)
-float32 pDop                            # Position Dilution of Precision (m)	
+geometry_msgs/Vector3 posecef           # Position (m) in ECEF
+geometry_msgs/Vector3 velecef           # Velocity (m/s) in ECEF
+float32 hmsl                            # Height above MSL
+float32 hacc                            # Horizontal accuracy
+float32 vacc                            # Vertical accuracy
+float32 sacc                            # Speed accuracy (m/s)
+float32 pdop                            # Position Dilution of Precision (m)	
 

@@ -300,10 +300,10 @@ public:
      * @brief ros_time_from_week_and_tow
      * Get current ROS time from week and tow
      * @param week Weeks since January 6th, 1980
-     * @param timeOfWeek Time of week (since Sunday morning) in seconds, GMT
+     * @param timeofweek Time of week (since Sunday morning) in seconds, GMT
      * @return equivalent ros::Time
      */
-    ros::Time ros_time_from_week_and_tow(const uint32_t week, const double timeOfWeek);
+    ros::Time ros_time_from_week_and_tow(const uint32_t week, const double timeofweek);
 
     /**
      * @brief ros_time_from_start_time
@@ -367,10 +367,10 @@ public:
     nav_msgs::Odometry enu_odom_msg;
     sensor_msgs::NavSatFix NavSatFix_msg;
     inertial_sense_ros::GPS gps1_msg;
-    geometry_msgs::Vector3Stamped gps1_velEcef;
+    geometry_msgs::Vector3Stamped gps1_velecef;
     inertial_sense_ros::GPSInfo gps_info_msg;
     inertial_sense_ros::GPS gps2_msg;
-    geometry_msgs::Vector3Stamped gps2_velEcef;
+    geometry_msgs::Vector3Stamped gps2_velecef;
     inertial_sense_ros::GPSInfo gps2_info_msg;
     inertial_sense_ros::INL2States inl2_states_msg;
     inertial_sense_ros::DID_INS1 did_ins_1_msg;

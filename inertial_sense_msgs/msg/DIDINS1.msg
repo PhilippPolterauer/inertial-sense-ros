@@ -1,8 +1,8 @@
 Header          header
 uint32          week
-float64         timeOfWeek
-uint32          insStatus
-uint32          hdwStatus
+float64         timeofweek
+uint32          insstatus
+uint32          hdwstatus
 float32[3]      theta
 float32[3]      uvw
 float64[3]      lla
