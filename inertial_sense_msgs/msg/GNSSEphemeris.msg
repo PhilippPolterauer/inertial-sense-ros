@@ -1,4 +1,4 @@
-Header header
+std_msgs/Header header
 int32 sat 		# satellite number
 int32 iode 		# IODE Issue of Data, Ephemeris (ephemeris version)
 int32 iodc 		# IODC Issue of Data, Clock (clock version)
