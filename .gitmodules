@@ -1,3 +1,3 @@
-[submodule "lib/inertial-sense-sdk"]
-	path = lib/inertial-sense-sdk
-	url = git@github.com:inertialsense/inertial-sense-sdk.git
+[submodule "inertial_sense_ros/lib/inertial-sense-sdk"]
+	path = inertial_sense_ros/lib/inertial-sense-sdk
+	url = https://github.com/inertialsense/inertial-sense-sdk.git
