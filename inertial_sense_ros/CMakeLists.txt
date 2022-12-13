@@ -7,6 +7,7 @@ find_package(ament_cmake REQUIRED)
 find_package(inertial_sense_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -31,7 +32,18 @@ add_subdirectory(lib/inertial-sense-sdk)
 add_library(inertial_sense_ros
         src/inertial_sense_ros.cpp
 )
-ament_target_dependencies(inertial_sense_ros rclcpp std_msgs geometry_msgs nav_msgs)
+ament_target_dependencies(
+  inertial_sense_ros 
+  rclcpp 
+  std_msgs 
+  geometry_msgs 
+  nav_msgs 
+  sensor_msgs 
+  inertial_sense_msgs 
+  std_srvs 
+  diagnostic_msgs
+  tf2_ros
+)
 target_link_libraries(inertial_sense_ros InertialSense ${YAML_CPP_LIBRARIES} pthread)
 target_include_directories(inertial_sense_ros PUBLIC include lib/inertial-sense-sdk/src)
 # add_dependencies(inertial_sense_ros inertial_sense_ros_generate_messages_cpp)
