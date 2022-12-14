@@ -40,7 +40,7 @@
 #include <tf2_ros/transform_broadcaster.h>
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include "ISConstants.h"
-//#include "geometry/xform.h"
+// #include "geometry/xform.h"
 
 #define GPS_UNIX_OFFSET 315964800 // GPS time started on 6/1/1980 while UNIX time started 1/1/1970 this is the difference between those in seconds
 #define LEAP_SECONDS 18           // GPS time does not have leap seconds, UNIX does (as of 1/1/2017 - next one is probably in 2020 sometime unless there is some crazy earthquake or nuclear blast)
@@ -49,17 +49,17 @@
 #define FIRMWARE_VERSION_CHAR1 9
 #define FIRMWARE_VERSION_CHAR2 0
 
-#define SET_CALLBACK(DID, __type, __cb_fun, __periodmultiple)                          \
-    IS_.BroadcastBinaryData(DID, __periodmultiple,                                     \
-                            [this](InertialSense *i, p_data_t *data, int pHandle)      \
-                            {                                                          \
-                                /* ROS_INFO("Got message %d", DID);*/                  \
+#define SET_CALLBACK(DID, __type, __cb_fun, __periodmultiple)                               \
+    IS_.BroadcastBinaryData(DID, __periodmultiple,                                          \
+                            [this](InertialSense *i, p_data_t *data, int pHandle)           \
+                            {                                                               \
+                                /* ROS_INFO("Got message %d", DID);*/                       \
                                 this->__cb_fun(DID, reinterpret_cast<__type *>(data->buf)); \
                             })
 
 class InertialSenseROS //: SerialListener
 {
-    using TriggerReq = std_srvs::srv::Trigger::Request::ConstSharedPtr;
+    using TriggerReq = std_srvs::srv::Trigger::Request::SharedPtr;
     using TriggerRes = std_srvs::srv::Trigger::Response::SharedPtr;
     using RefllaReq = inertial_sense_msgs::srv::RefLLAUpdate::Request::ConstSharedPtr;
     using RefllaRes = inertial_sense_msgs::srv::RefLLAUpdate::Response::SharedPtr;
@@ -96,13 +96,13 @@ public:
     void start_rtk_server(const std::string &RTK_server_IP, const int RTK_server_port);
 
     void configure_data_streams(bool startup);
-    // void configure_data_streams(const rclcpp::TimerEvent& event);
+    void configure_data_streams();
     void configure_ascii_output();
     void start_log();
 
     template <typename T>
     void get_vector_flash_config(std::string param_name, uint32_t size, T &data);
-    //void set_vector_flash_config(std::string param_name, uint32_t size, uint32_t offset);
+    // void set_vector_flash_config(std::string param_name, uint32_t size, uint32_t offset);
     void get_flash_config();
     void reset_device();
     void flash_config_callback(eDataIDs DID, const nvm_flash_cfg_t *const msg);
@@ -117,15 +117,31 @@ public:
     std::string frame_id_ = "body";
 
     // ROS Stream handling
+    template <typename T>
+    struct
+        ros_stream_t
+    {
+        bool enabled = false;
+        rclcpp::Publisher<T>::SharedPtr pub;
+        int period_multiple = 1;
+    };
+
     typedef struct
     {
         bool enabled = false;
-        rclcpp::PublisherBase::SharedPtr pub;
-        rclcpp::PublisherBase::SharedPtr pub2;
-        rclcpp::PublisherBase::SharedPtr pub3;
+        rclcpp::Publisher<inertial_sense_msgs::msg::RTKRel>::SharedPtr pub_rel;
+        rclcpp::Publisher<inertial_sense_msgs::msg::RTKInfo>::SharedPtr pub_info;
         int period_multiple = 1;
-    } ros_stream_t;
+    } ros_stream_rtk_t;
 
+    typedef struct
+    {
+        bool enabled = false;
+        rclcpp::Publisher<inertial_sense_msgs::msg::GNSSObsVec>::SharedPtr pub_obs;
+        rclcpp::Publisher<inertial_sense_msgs::msg::GNSSEphemeris>::SharedPtr pub_eph;
+        rclcpp::Publisher<inertial_sense_msgs::msg::GlonassEphemeris>::SharedPtr pub_geph;
+        int period_multiple = 1;
+    } ros_stream_gpsraw_t;
 
     tf2_ros::TransformBroadcaster br;
     bool publishTf_ = true;
@@ -181,10 +197,10 @@ public:
     std::string gps2_type_ = "F9P";
     std::string gps2_topic_ = "gps2";
 
-    // rclcpp::TimerBase rtk_connectivity_watchdog_timer_;
+    rclcpp::TimerBase::SharedPtr rtk_connectivity_watchdog_timer_;
     void start_rtk_connectivity_watchdog_timer();
     void stop_rtk_connectivity_watchdog_timer();
-    // void rtk_connectivity_watchdog_timer_callback(const rclcpp::TimerEvent &timer_event);
+    void rtk_connectivity_watchdog_timer_callback();
 
     void INS1_callback(eDataIDs DID, const ins_1_t *const msg);
     void INS2_callback(eDataIDs DID, const ins_2_t *const msg);
@@ -204,7 +220,7 @@ public:
     void GPS_vel_callback(eDataIDs DID, const gps_vel_t *const msg);
     void GPS_raw_callback(eDataIDs DID, const gps_raw_t *const msg);
     void GPS_obs_callback(eDataIDs DID, const obsd_t *const msg, int nObs);
-    // void GPS_obs_bundle_timer_callback(const ros::TimerEvent &e);
+    void GPS_obs_bundle_timer_callback();
     void GPS_eph_callback(eDataIDs DID, const eph_t *const msg);
     void GPS_geph_callback(eDataIDs DID, const geph_t *const msg);
     void RTK_Misc_callback(eDataIDs DID, const gps_rtk_misc_t *const msg);
@@ -213,28 +229,28 @@ public:
     float diagnostic_ar_ratio_, diagnostic_differential_age_, diagnostic_heading_base_to_rover_;
     uint diagnostic_fix_type_;
 
-    ros_stream_t DID_INS_1_;
-    ros_stream_t DID_INS_2_;
-    ros_stream_t DID_INS_4_;
-    ros_stream_t INL2_states_;
-    ros_stream_t odom_ins_ned_;
-    ros_stream_t odom_ins_ecef_;
-    ros_stream_t odom_ins_enu_;
-    ros_stream_t IMU_;
-    ros_stream_t mag_;
-    ros_stream_t baro_;
-    ros_stream_t preint_IMU_;
-    ros_stream_t diagnostics_;
-    ros_stream_t GPS1_;
-    ros_stream_t GPS1_info_;
-    ros_stream_t GPS1_raw_;
-    ros_stream_t GPS2_;
-    ros_stream_t GPS2_info_;
-    ros_stream_t GPS2_raw_;
-    ros_stream_t GPS_base_raw_;
-    ros_stream_t RTK_pos_;
-    ros_stream_t RTK_cmp_;
-    ros_stream_t NavSatFix_;
+    ros_stream_t<inertial_sense_msgs::msg::DIDINS1> DID_INS_1_;
+    ros_stream_t<inertial_sense_msgs::msg::DIDINS2> DID_INS_2_;
+    ros_stream_t<inertial_sense_msgs::msg::DIDINS4> DID_INS_4_;
+    ros_stream_t<inertial_sense_msgs::msg::INL2States> INL2_states_;
+    ros_stream_t<nav_msgs::msg::Odometry> odom_ins_ned_;
+    ros_stream_t<nav_msgs::msg::Odometry> odom_ins_ecef_;
+    ros_stream_t<nav_msgs::msg::Odometry> odom_ins_enu_;
+    ros_stream_t<sensor_msgs::msg::Imu> IMU_;
+    ros_stream_t<sensor_msgs::msg::MagneticField> mag_;
+    ros_stream_t<sensor_msgs::msg::FluidPressure> baro_;
+    ros_stream_t<inertial_sense_msgs::msg::PreIntIMU> preint_IMU_;
+    ros_stream_t<diagnostic_msgs::msg::DiagnosticArray> diagnostics_;
+    ros_stream_t<inertial_sense_msgs::msg::GPS> GPS1_;
+    ros_stream_t<inertial_sense_msgs::msg::GPSInfo> GPS1_info_;
+    ros_stream_gpsraw_t GPS1_raw_;
+    ros_stream_t<inertial_sense_msgs::msg::GPS> GPS2_;
+    ros_stream_t<inertial_sense_msgs::msg::GPSInfo> GPS2_info_;
+    ros_stream_gpsraw_t GPS2_raw_;
+    ros_stream_gpsraw_t GPS_base_raw_;
+    ros_stream_rtk_t RTK_pos_;
+    ros_stream_rtk_t RTK_cmp_;
+    ros_stream_t<sensor_msgs::msg::NavSatFix> NavSatFix_;
     bool NavSatFixConfigured = false;
     int gps_raw_period_multiple = 1;
     int gps_info_period_multiple = 1;
@@ -304,6 +320,8 @@ public:
         SERVICE_COMPASS = 0x4, // includes BeiDou.
         SERVICE_GALILEO = 0x8
     };
+
+    rclcpp::Time now();
 
     /**
      * @brief ros_time_from_week_and_tow
@@ -395,7 +413,7 @@ public:
     // Connection to the uINS
     InertialSense IS_;
 
-    //Flash parameters
+    // Flash parameters
 
     int navigation_dt_ms_ = 4;
     float insRotation_[3] = {0, 0, 0};
@@ -407,5 +425,5 @@ public:
     float magDeclination_ = 0;
     int insDynModel_ = INS_DYN_MODEL_AIRBORNE_4G;
     bool refLLA_known = false;
-    int ioConfig_ = 39624800; //F9P RUG2 RTK CMP: 0x025ca060
+    int ioConfig_ = 39624800; // F9P RUG2 RTK CMP: 0x025ca060
 };
