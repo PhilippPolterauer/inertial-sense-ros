@@ -36,11 +36,11 @@
  */
 
 #include <serial.h>
-
+#include <stdio.hpp>
 
 using boost::asio::serial_port_base;
 
-Serial::Serial(std::string port, int baud_rate) :
+Serial::Serial(std::string port, int baud_rate):
   io_service_(),
   write_in_progress_(false),
   serial_port_(io_service_),
