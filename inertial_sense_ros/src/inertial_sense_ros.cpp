@@ -1125,7 +1125,7 @@ void InertialSenseROS::INS4_callback(eDataIDs DID, const ins_4_t *const msg)
             {;
                 tf2::Transform tf;
                 tf2::fromMsg(ecef_odom_msg.pose.pose,tf);
-                transform_ENU_.transform = tf2::toMsg(tf);
+                transform_ECEF_.transform = tf2::toMsg(tf);
                 transform_ECEF_.header.frame_id="ins_ecef";
                 transform_ECEF_.child_frame_id="ins_base_link_ecef";
                 transform_ECEF_.header.stamp=now();
@@ -1209,16 +1209,10 @@ void InertialSenseROS::INS4_callback(eDataIDs DID, const ins_4_t *const msg)
             if (publishTf_)
             {
                 // // Calculate the TF from the pose...
-                // transform_NED.setOrigin(tf::Vector3(ned_odom_msg.pose.pose.position.x, ned_odom_msg.pose.pose.position.y, ned_odom_msg.pose.pose.position.z));
-                // tf::Quaternion q;
-                // tf::quaternionMsgToTF(ned_odom_msg.pose.pose.orientation, q);
-                // transform_NED.setRotation(q);
-
-                // br.sendTransform(tf::StampedTransform(transform_NED, now(), "ins_ned", "ins_base_link_ned"));
 
                 tf2::Transform tf;
                 tf2::fromMsg(ned_odom_msg.pose.pose,tf);
-                transform_ENU_.transform = tf2::toMsg(tf);
+                transform_NED_.transform = tf2::toMsg(tf);
                 transform_NED_.header.frame_id="ins_ned";
                 transform_NED_.child_frame_id="ins_base_link_ned";
                 transform_NED_.header.stamp=now();
