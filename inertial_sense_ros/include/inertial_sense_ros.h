@@ -38,6 +38,7 @@
 #include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
 #include <tf2_ros/transform_broadcaster.h>
+#include <tf2/LinearMath/Transform.h>
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include "ISConstants.h"
 // #include "geometry/xform.h"
@@ -61,7 +62,7 @@ class InertialSenseROS //: SerialListener
 {
     using TriggerReq = std_srvs::srv::Trigger::Request::SharedPtr;
     using TriggerRes = std_srvs::srv::Trigger::Response::SharedPtr;
-    using RefllaReq = inertial_sense_msgs::srv::RefLLAUpdate::Request::ConstSharedPtr;
+    using RefllaReq = inertial_sense_msgs::srv::RefLLAUpdate::Request::SharedPtr;
     using RefllaRes = inertial_sense_msgs::srv::RefLLAUpdate::Response::SharedPtr;
     using FirmwareUpdateReq = inertial_sense_msgs::srv::FirmwareUpdate::Request::ConstSharedPtr;
     using FirmwareUpdateRes = inertial_sense_msgs::srv::FirmwareUpdate::Response::SharedPtr;
@@ -145,9 +146,9 @@ public:
 
     tf2_ros::TransformBroadcaster br;
     bool publishTf_ = true;
-    geometry_msgs::msg::TransformStamped transform_NED;
-    geometry_msgs::msg::TransformStamped transform_ENU;
-    geometry_msgs::msg::TransformStamped transform_ECEF;
+    geometry_msgs::msg::TransformStamped transform_NED_;
+    geometry_msgs::msg::TransformStamped transform_ENU_;
+    geometry_msgs::msg::TransformStamped transform_ECEF_;
     enum
     {
         NED,
@@ -160,7 +161,7 @@ public:
     rclcpp::PublisherBase::SharedPtr odom_ins_ned_pub_;
     rclcpp::PublisherBase::SharedPtr odom_ins_ecef_pub_;
     rclcpp::PublisherBase::SharedPtr odom_ins_enu_pub_;
-    rclcpp::PublisherBase::SharedPtr strobe_pub_;
+    rclcpp::Publisher<std_msgs::msg::Header>::SharedPtr strobe_pub_;
     rclcpp::TimerBase::SharedPtr obs_bundle_timer_;
     rclcpp::Time last_obs_time_1_;
     rclcpp::Time last_obs_time_2_;
