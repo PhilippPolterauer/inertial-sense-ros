@@ -909,7 +909,7 @@ template <typename T>
 void InertialSenseROS::get_vector_flash_config(std::string param_name, uint32_t size, T &data)
 {
     std::vector<double> tmp(size, 0);
-    if (!nh_private_.hasParam(param_name))
+    if (!nh_private_.has_parameter(param_name))
     { // Parameter not provided.
         return;
     }
@@ -2101,7 +2101,7 @@ void InertialSenseROS::diagnostics_callback()
     diagnostics_.pub->publish(diag_array);
 }
 
-bool InertialSenseROS::set_current_position_as_refLLA(TriggerReq req, TriggerRes res)
+void InertialSenseROS::set_current_position_as_refLLA(TriggerReq req, TriggerRes res)
 {
     (void)req;
     double current_lla_[3];
@@ -2137,11 +2137,9 @@ bool InertialSenseROS::set_current_position_as_refLLA(TriggerReq req, TriggerRes
         res->success = false;
         res->message = "Unable to update refLLA. Please try again.";
     }
-
-    return true;
 }
 
-bool InertialSenseROS::set_refLLA_to_value(RefllaReq req, RefllaRes res)
+void InertialSenseROS::set_refLLA_to_value(RefllaReq req, RefllaRes res)
 {
     IS_.SendData(DID_FLASH_CONFIG, reinterpret_cast<uint8_t *>(&req->lla), sizeof(req->lla), offsetof(nvm_flash_cfg_t, refLla));
 
@@ -2171,11 +2169,9 @@ bool InertialSenseROS::set_refLLA_to_value(RefllaReq req, RefllaRes res)
         res->success = false;
         res->message = "Unable to update refLLA. Please try again.";
     }
-
-    return true;
 }
 
-bool InertialSenseROS::perform_mag_cal_srv_callback(TriggerReq req, TriggerRes res)
+void InertialSenseROS::perform_mag_cal_srv_callback(TriggerReq req, TriggerRes res)
 {
     (void)req;
     uint32_t single_axis_command = 2;
@@ -2198,19 +2194,16 @@ bool InertialSenseROS::perform_mag_cal_srv_callback(TriggerReq req, TriggerRes r
             {
                 res->success = true;
                 res->message = "Successfully initiated mag recalibration.";
-                return true;
             }
         }
     }
-
-    return true;
 }
 
 rclcpp::Time InertialSenseROS::now(){
     return nh_.get_clock()->now();
 }
 
-bool InertialSenseROS::perform_multi_mag_cal_srv_callback(TriggerReq req, TriggerRes res)
+void InertialSenseROS::perform_multi_mag_cal_srv_callback(TriggerReq req, TriggerRes res)
 {
     (void)req;
     uint32_t multi_axis_command = 1;
@@ -2233,12 +2226,9 @@ bool InertialSenseROS::perform_multi_mag_cal_srv_callback(TriggerReq req, Trigge
             {
                 res->success = true;
                 res->message = "Successfully initiated mag recalibration.";
-                return true;
             }
         }
     }
-
-    return true;
 }
 
 void InertialSenseROS::reset_device()
@@ -2252,7 +2242,7 @@ void InertialSenseROS::reset_device()
     rclcpp::shutdown();
 }
 
-bool InertialSenseROS::update_firmware_srv_callback(FirmwareUpdateReq req, FirmwareUpdateRes res)
+void InertialSenseROS::update_firmware_srv_callback(FirmwareUpdateReq req, FirmwareUpdateRes res)
 {
     //   IS_.Close();
     //   vector<InertialSense::bootload_result_t> results = IS_.BootloadFile("*", req->filename, 921600);

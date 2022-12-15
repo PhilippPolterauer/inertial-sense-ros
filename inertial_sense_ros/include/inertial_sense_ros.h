@@ -118,12 +118,11 @@ public:
     std::string frame_id_ = "body";
 
     // ROS Stream handling
-    template <typename T>
-    struct
-        ros_stream_t
+    template <typename T> struct ros_stream_t
     {
+        // typedef rclcpp::Publisher<T>::SharedPtr pubT;
         bool enabled = false;
-        rclcpp::Publisher<T>::SharedPtr pub;
+        typename rclcpp::Publisher<T>::SharedPtr (pub);
         int period_multiple = 1;
     };
 
@@ -288,11 +287,11 @@ public:
     rclcpp::ServiceBase::SharedPtr firmware_update_srv_;
     rclcpp::ServiceBase::SharedPtr refLLA_set_current_srv_;
     rclcpp::ServiceBase::SharedPtr refLLA_set_value_srv_;
-    bool set_current_position_as_refLLA(TriggerReq req, TriggerRes res);
-    bool set_refLLA_to_value(RefllaReq req, RefllaRes res);
-    bool perform_mag_cal_srv_callback(TriggerReq req, TriggerRes res);
-    bool perform_multi_mag_cal_srv_callback(TriggerReq req, TriggerRes res);
-    bool update_firmware_srv_callback(FirmwareUpdateReq req, FirmwareUpdateRes res);
+    void set_current_position_as_refLLA(TriggerReq req, TriggerRes res);
+    void set_refLLA_to_value(RefllaReq req, RefllaRes res);
+    void perform_mag_cal_srv_callback(TriggerReq req, TriggerRes res);
+    void perform_multi_mag_cal_srv_callback(TriggerReq req, TriggerRes res);
+    void update_firmware_srv_callback(FirmwareUpdateReq req, FirmwareUpdateRes res);
 
     void publishGPS1();
     void publishGPS2();
