@@ -282,11 +282,12 @@ public:
     bool data_streams_enabled_ = false;
 
     // Services
-    rclcpp::ServiceBase::SharedPtr mag_cal_srv_;
-    rclcpp::ServiceBase::SharedPtr multi_mag_cal_srv_;
-    rclcpp::ServiceBase::SharedPtr firmware_update_srv_;
-    rclcpp::ServiceBase::SharedPtr refLLA_set_current_srv_;
-    rclcpp::ServiceBase::SharedPtr refLLA_set_value_srv_;
+    // inertial_sense_msgs::srv::RefLLAUpdate
+    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr mag_cal_srv_;
+    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr multi_mag_cal_srv_;
+    rclcpp::Service<inertial_sense_msgs::srv::FirmwareUpdate>::SharedPtr firmware_update_srv_;
+    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr refLLA_set_current_srv_;
+    rclcpp::Service<inertial_sense_msgs::srv::RefLLAUpdate>::SharedPtr refLLA_set_value_srv_;
     void set_current_position_as_refLLA(TriggerReq req, TriggerRes res);
     void set_refLLA_to_value(RefllaReq req, RefllaRes res);
     void perform_mag_cal_srv_callback(TriggerReq req, TriggerRes res);

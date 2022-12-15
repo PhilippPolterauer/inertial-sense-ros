@@ -3,7 +3,7 @@
 int main(int argc, char**argv)
 {
     InertialSenseROS* thing;
-    ros::init(argc, argv, "inertial_sense_node");
+    rclcpp::init(argc, argv);
     if (argc > 1)
     {
         std::string paramYamlPath = argv[1];
@@ -27,10 +27,12 @@ int main(int argc, char**argv)
         thing = new InertialSenseROS;
     }
 
-    while (ros::ok())
+    while (rclcpp::ok())
     {
-        ros::spinOnce();
+        rclcpp::spin_some(thing->nh_.get_node_base_interface());
+        rclcpp::spin_some(thing->nh_private_.get_node_base_interface());
         thing->update();
     }
+    rclcpp::shutdown();
     return 0;
 }

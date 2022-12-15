@@ -49,10 +49,10 @@ InertialSenseROS::InertialSenseROS(YAML::Node paramNode, bool configFlashParamet
     }
 
     // Start Up ROS service servers
-    refLLA_set_current_srv_ = nh_.create_service<inertial_sense_msgs::srv::RefLLAUpdate>("set_refLLA_current", std::bind(&InertialSenseROS::set_current_position_as_refLLA, this, std::placeholders::_1, std::placeholders::_2));
+    refLLA_set_current_srv_ = nh_.create_service<std_srvs::srv::Trigger>("set_refLLA_current", std::bind(&InertialSenseROS::set_current_position_as_refLLA, this, std::placeholders::_1, std::placeholders::_2));
     refLLA_set_value_srv_ = nh_.create_service<inertial_sense_msgs::srv::RefLLAUpdate>("set_refLLA_value", std::bind(&InertialSenseROS::set_refLLA_to_value, this, std::placeholders::_1, std::placeholders::_2));
-    mag_cal_srv_ = nh_.create_service<std_srvs::srv::Trigger>("single_axis_mag_cal", bind_membercb_service(&InertialSenseROS::perform_mag_cal_srv_callback, this));
-    multi_mag_cal_srv_ = nh_.create_service<std_srvs::srv::Trigger>("multi_axis_mag_cal", bind_membercb_service(&InertialSenseROS::perform_multi_mag_cal_srv_callback, this));
+    mag_cal_srv_ = nh_.create_service<std_srvs::srv::Trigger>("single_axis_mag_cal", std::bind(&InertialSenseROS::perform_mag_cal_srv_callback, this, std::placeholders::_1, std::placeholders::_2));
+    multi_mag_cal_srv_ = nh_.create_service<std_srvs::srv::Trigger>("multi_axis_mag_cal", std::bind(&InertialSenseROS::perform_multi_mag_cal_srv_callback, this, std::placeholders::_1, std::placeholders::_2));
     // firmware_update_srv_ = nh_.advertiseService("firmware_update", &InertialSenseROS::update_firmware_srv_callback, this);
     // data_stream_timer_ = nh_.create_wall_timer(std::chrono::duration(1*std::chrono_literals::s()), configure_data_streams, this); // 2 Hz
     if (diagnostics_.enabled)
@@ -1123,7 +1123,9 @@ void InertialSenseROS::INS4_callback(eDataIDs DID, const ins_4_t *const msg)
 
             if (publishTf_)
             {;
-                tf2::convert(ecef_odom_msg.pose.pose, transform_ECEF_);
+                tf2::Transform tf;
+                tf2::fromMsg(ecef_odom_msg.pose.pose,tf);
+                transform_ENU_.transform = tf2::toMsg(tf);
                 transform_ECEF_.header.frame_id="ins_ecef";
                 transform_ECEF_.child_frame_id="ins_base_link_ecef";
                 transform_ECEF_.header.stamp=now();
@@ -1213,7 +1215,10 @@ void InertialSenseROS::INS4_callback(eDataIDs DID, const ins_4_t *const msg)
                 // transform_NED.setRotation(q);
 
                 // br.sendTransform(tf::StampedTransform(transform_NED, now(), "ins_ned", "ins_base_link_ned"));
-                tf2::convert(ned_odom_msg.pose.pose, transform_NED_);
+
+                tf2::Transform tf;
+                tf2::fromMsg(ned_odom_msg.pose.pose,tf);
+                transform_ENU_.transform = tf2::toMsg(tf);
                 transform_NED_.header.frame_id="ins_ned";
                 transform_NED_.child_frame_id="ins_base_link_ned";
                 transform_NED_.header.stamp=now();
@@ -1310,7 +1315,9 @@ void InertialSenseROS::INS4_callback(eDataIDs DID, const ins_4_t *const msg)
                 // tf::quaternionMsgToTF(enu_odom_msg.pose.pose.orientation, q);
                 // transform_ENU.setRotation(q);
                 // br.sendTransform(tf::StampedTransform(transform_ENU, now(), "ins_enu", "ins_base_link_enu"));
-                tf2::convert(ned_odom_msg.pose.pose, transform_ENU_);
+                tf2::Transform tf;
+                tf2::fromMsg(enu_odom_msg.pose.pose,tf);
+                transform_ENU_.transform = tf2::toMsg(tf);
                 transform_ENU_.header.frame_id="ins_enu";
                 transform_ENU_.child_frame_id="ins_base_link_enu";
                 transform_ENU_.header.stamp=now();
@@ -2253,8 +2260,6 @@ void InertialSenseROS::update_firmware_srv_callback(FirmwareUpdateReq req, Firmw
     //     return false;
     //   }
     //   IS_.Open(port_.c_str(), baudrate_);
-
-    return true;
 }
 
 rclcpp::Time InertialSenseROS::ros_time_from_week_and_tow(const uint32_t week, const double timeofweek)
