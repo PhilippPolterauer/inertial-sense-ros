@@ -1,6 +1,7 @@
 
 #include <gtest/gtest.h>
 #include "inertial_sense_ros.h"
+#include <chrono>
 
 InertialSense IS_;
 
@@ -19,7 +20,7 @@ void connect_rtk_client(const std::string& RTK_correction_protocol, const std::s
   { // NTRIP options
     RTK_connection += ":" + RTK_server_mount + ":" + RTK_server_username + ":" + RTK_server_password;
   }
-
+  auto logger = rclcpp::get_logger("Testing");
   int RTK_connection_attempt_count = 0;
   while (RTK_connection_attempt_count < RTK_connection_attempt_limit)
   {
@@ -29,22 +30,22 @@ void connect_rtk_client(const std::string& RTK_correction_protocol, const std::s
 
     if (connected)
     {
-      ROS_INFO_STREAM("Successfully connected to " << RTK_connection << " RTK server");
+      RCLCPP_INFO_STREAM(logger, "Successfully connected to " << RTK_connection << " RTK server");
       break;
     }
     else
     {
-      ROS_ERROR_STREAM("Failed to connect to base server at " << RTK_connection);
+      RCLCPP_ERROR_STREAM(logger, "Failed to connect to base server at " << RTK_connection);
 
       if (RTK_connection_attempt_count >= RTK_connection_attempt_limit)
       {
-        ROS_ERROR_STREAM("Giving up after " << RTK_connection_attempt_count << " failed attempts");
+        RCLCPP_ERROR_STREAM(logger, "Giving up after " << RTK_connection_attempt_count << " failed attempts");
       }
       else
       {
         int sleep_duration = RTK_connection_attempt_count * RTK_connection_attempt_backoff;
-        ROS_WARN_STREAM("Retrying connection in " << sleep_duration << " seconds");
-        ros::Duration(sleep_duration).sleep();
+        RCLCPP_WARN_STREAM(logger, "Retrying connection in " << sleep_duration << " seconds");
+        rclcpp::sleep_for(std::chrono::seconds(sleep_duration));        
       }
     }
   }
@@ -61,7 +62,7 @@ TEST(ReconnectionTestSuite, testReconnection)
 
 int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
-    ros::init(argc, argv, "test_publisher");
-    ros::NodeHandle nh;
+    rclcpp::init(argc, argv);
+    auto nh = rclcpp::Node::make_shared("test_publisher");
     return RUN_ALL_TESTS();
 }
